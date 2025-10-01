@@ -3,8 +3,7 @@
 
 Cena::Cena(int tempo, Objeto* objetos, int nObjetos) 
             :  _tempo(tempo),
-                _quantObjetos(0), 
-                _objetosNaCena(0) {
+                _quantObjetos(0) {
 
     for (int i = 0; i < nObjetos; i++)
         this->adicionarObjeto(objetos[i]);
@@ -18,20 +17,21 @@ void Cena::adicionarObjeto(Objeto objeto) {
 }
 
 void Cena::gerarCena() {
-    Objeto aux;
-
     this->_quickSort(0, this->_quantObjetos - 1, this->_objetos, this->POR_Y);
 
+    if (this->_quantObjetos <= 0) return; 
+
     for (int i = 0; i < this->_quantObjetos; i++) {
-        aux = this->_objetos[i];
+        for (int j = i + 1; j < this->_quantObjetos; j++){
+            int inter = this->_objetos[j].getQuantIntervalos();
 
-        if (this->_objetosNaCena > 0)
-            this->_calcularOclusao(&aux);
+            this->_calcularOclusao(this->_objetos[j].getIntervalos(), 
+                                   inter,
+                                    this->_objetos[i].getIntervalos(), 
+                                    this->_objetos[i].getQuantIntervalos()); 
 
-        if (aux.getInicio() < aux.getFim()) {
-            this->_cena[this->_objetosNaCena] = aux;
-            this->_objetosNaCena++;
-        }
+            this->_objetos[j].setQuantIntervalos(inter);
+        }        
     }
 }
 
@@ -41,42 +41,69 @@ void Cena::movimentarObjeto(int id, int x, int y) {
 }
 
 void Cena::imprimir() {
-    this->_quickSort(0, this->_objetosNaCena - 1, this->_cena, this->POR_ID);
+    Objeto o;
+    Intervalo* inter;
 
-    for (int i = 0; i < this->_objetosNaCena; i++) {
-        std::cout << std::fixed << std::setprecision(2);
+    this->_quickSort(0, this->_quantObjetos - 1, this->_objetos, this->POR_ID);
 
-        std::cout << "S "
-                  << this->_tempo << " "
-                  << this->_cena[i].getId() << " " 
-                  << this->_cena[i].getInicio() << " " 
-                  << this->_cena[i].getFim() 
-                  << std::endl;
+    std::cout << std::fixed << std::setprecision(2);
+
+    for (int i = 0; i < this->_quantObjetos; i++) {
+        o = this->_objetos[i];
+        inter = o.getIntervalos();
+        for (int j = 0; j < o.getQuantIntervalos(); j++) {
+            std::cout << "S "
+                    << this->_tempo << " "
+                    << o.getId() << " "
+                    << inter[j].inicio << " "
+                    << inter[j].fim << std::endl;
+        }
     }
 }
 
 Objeto* Cena::getObjetos() { return this->_objetos; }
 
 
-void Cena::_calcularOclusao(Objeto* objeto) {
-    Objeto ocluidor;
+void Cena::_calcularOclusao(
+    Intervalo* A, int& quantA,
+    Intervalo* B, int quantB   
+) {
+    Intervalo currA;
+    int iA = 0, iB = 0, iWA = 0;
 
-    for (int i = 0; i < this->_objetosNaCena; i++) {
-        ocluidor = this->_cena[i];
+    while (iA < quantA) {
+        currA = A[iA];
 
-        if (!ocluidor.estaNoIntervalo(*objeto)) 
-            continue;
+        // Avança B até que possa afetar A
+        while (iB < quantB && B[iB].fim <= currA.inicio) {
+            iB++;
+        }
 
-        if (objeto->getFim() > ocluidor.getInicio())
-            objeto->setFim(ocluidor.getInicio()); 
+        double inicio = currA.inicio;
 
-        if (objeto->getInicio() < ocluidor.getFim())
-            objeto->setInicio(ocluidor.getFim());
-            
-        if (objeto->getInicio() >= objeto->getFim())
-            return;
+        while (iB < quantB && B[iB].inicio < currA.fim) {
+            if (B[iB].inicio > inicio) {
+                Intervalo sobra = {inicio, B[iB].inicio};
+                A[iWA++] = sobra;
+            }
+            inicio = (inicio > B[iB].fim) ? inicio : B[iB].fim;
+
+            if (inicio >= currA.fim) break;
+            iB++;
+        }
+
+        if (inicio < currA.fim) {
+            Intervalo sobra = {inicio, currA.fim};
+            A[iWA++] = sobra;
+        }
+
+        iA++;
     }
+
+    quantA = iWA;
 }
+
+
 
 void Cena::_particao(int esq, int dir, int* i, int* j, Objeto* objetos, _CriterioOrdenacao criterio) {
     Objeto x;

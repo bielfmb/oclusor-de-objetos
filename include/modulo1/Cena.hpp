@@ -9,7 +9,7 @@
 class Cena {
     public:
         Cena(int tempo, Objeto* objetos, int nObjetos);
-
+        
         void adicionarObjeto(Objeto objeto);
         void gerarCena();
         void movimentarObjeto(int id, int x, int y);
@@ -26,16 +26,13 @@ class Cena {
         static const int _MAX_TAM = 100;
         int _tempo;
         int _quantObjetos;
-        int _objetosNaCena;
         Objeto _objetos[_MAX_TAM];
-        Objeto _cena[_MAX_TAM];
 
-        void _calcularOclusao(Objeto* objeto);
+        void _calcularOclusao(Intervalo* A, int& quantA,
+                              Intervalo* B, int quantB);
 
-        void _particao(int esq, 
-                       int dir, 
-                       int* i, 
-                       int* j, 
+        void _particao(int esq, int dir, 
+                       int* i, int* j, 
                        Objeto *objetos,
                        _CriterioOrdenacao criterio);
 
@@ -44,9 +41,7 @@ class Cena {
                         Objeto *objetos, 
                         _CriterioOrdenacao criterio);
 
-        int _calcularPivo(int x, 
-                          int y,
-                          int z, 
+        int _calcularPivo(int x, int y, int z, 
                           Objeto *objetos, 
                           _CriterioOrdenacao criterio);
 
