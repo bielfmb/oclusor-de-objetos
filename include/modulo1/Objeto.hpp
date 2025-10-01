@@ -1,6 +1,8 @@
 #ifndef MODULO1_OBJETO_HPP
 #define MODULO1_OBJETO_HPP
 
+#include "modulo1/Intervalo.hpp"
+
 
 class Objeto {
     public:
@@ -8,28 +10,30 @@ class Objeto {
         Objeto();
 
         void movimentar(double x, double y);
-        bool estaNoIntervalo(Objeto objeto);
+        void _adicionarIntervalo(double x);
+        void _adicionarIntervalo(Intervalo inter);
+        void _atualizarIntervalo(int pos, double x);
+        void _removerIntervalo(int pos, double x);
 
         Objeto& operator = (const Objeto& objeto);
 
+        int getQuantIntervalos();
+        void setQuantIntervalos(int quant);
         int getId();
         double getX();
         double getY();
-        double getInicio();
-        void setInicio(double inicio);
-        double getFim();
-        void setFim(double fim);
+        Intervalo* getIntervalos();
 
     private:
+        static const int _MAX_TAM = 10;
+        int _quantIntervalos;
         int _id;
         double _x, _y;
         double _largura;
         
-        // NOTA: atributos para verficar onde começa e termina um objeto no eixo x
-        double _inicio, _fim;
-
-        // NOTA: calcula inicio e fim do objeto sempre que ele é criado/movimentado
-        void _calcularIntervalo();
+        // NOTA: lista de possiveis intervalos do objeto
+        Intervalo _intervalos[_MAX_TAM];
+        
 };
 
 #endif
