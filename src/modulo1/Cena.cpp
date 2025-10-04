@@ -19,19 +19,15 @@ void Cena::adicionarObjeto(Objeto objeto) {
 void Cena::gerarCena() {
     this->_quickSort(0, this->_quantObjetos - 1, this->_objetos, this->POR_Y);
 
-    if (this->_quantObjetos <= 0) return; 
+    if (this->_quantObjetos <= 0) return;
 
     for (int i = 0; i < this->_quantObjetos; i++) {
-        for (int j = i + 1; j < this->_quantObjetos; j++){
-            int inter = this->_objetos[j].getQuantIntervalos();
-
-            this->_calcularOclusao(this->_objetos[j].getIntervalos(), 
-                                   inter,
-                                    this->_objetos[i].getIntervalos(), 
-                                    this->_objetos[i].getQuantIntervalos()); 
-
-            this->_objetos[j].setQuantIntervalos(inter);
-        }        
+        Objeto& objFrente = this->_objetos[i];
+        
+        for (int j = i + 1; j < this->_quantObjetos; j++) {
+            Objeto& objTras = this->_objetos[j];
+            this->_calcularOclusao(objFrente, objTras);
+        }
     }
 }
 
@@ -64,46 +60,58 @@ void Cena::imprimir() {
 Objeto* Cena::getObjetos() { return this->_objetos; }
 
 
-void Cena::_calcularOclusao(
-    Intervalo* A, int& quantA,
-    Intervalo* B, int quantB   
-) {
-    Intervalo currA;
-    int iA = 0, iB = 0, iWA = 0;
+void Cena::_calcularOclusao(Objeto& frente, Objeto& tras) {
+    Intervalo* intervalosFrente = frente.getIntervalos();
+    Intervalo* intervalosTras = tras.getIntervalos();
+    int quantFrente = frente.getQuantIntervalos();
+    int quantTras = tras.getQuantIntervalos();
 
-    while (iA < quantA) {
-        currA = A[iA];
+    Intervalo novosIntervalos[this->_MAX_TAM];
+    int novoQuant = 0;
 
-        // Avança B até que possa afetar A
-        while (iB < quantB && B[iB].fim <= currA.inicio) {
-            iB++;
-        }
+    for (int i = 0; i < quantTras && novoQuant < this->_MAX_TAM; i++) {
+        Intervalo atual = intervalosTras[i];
+        bool ocluido = false;
 
-        double inicio = currA.inicio;
-
-        while (iB < quantB && B[iB].inicio < currA.fim) {
-            if (B[iB].inicio > inicio) {
-                Intervalo sobra = {inicio, B[iB].inicio};
-                A[iWA++] = sobra;
+        for (int j = 0; j < quantFrente && !ocluido; j++) {
+            Intervalo oclusor = intervalosFrente[j];
+            
+            if (atual.fim <= oclusor.inicio || atual.inicio >= oclusor.fim) {
+                continue;
             }
-            inicio = (inicio > B[iB].fim) ? inicio : B[iB].fim;
-
-            if (inicio >= currA.fim) break;
-            iB++;
+            
+            if (atual.inicio >= oclusor.inicio && atual.fim <= oclusor.fim) {
+                ocluido = true;
+                break;
+            }
+            
+            if (atual.inicio < oclusor.inicio) {
+                Intervalo esquerda = {atual.inicio, oclusor.inicio};
+                if (novoQuant < this->_MAX_TAM) {
+                    novosIntervalos[novoQuant++] = esquerda;
+                }
+            }
+            
+            if (atual.fim > oclusor.fim) {
+                Intervalo direita = {oclusor.fim, atual.fim};
+                atual = direita; 
+            } else {
+                ocluido = true;
+                break;
+            }
         }
-
-        if (inicio < currA.fim) {
-            Intervalo sobra = {inicio, currA.fim};
-            A[iWA++] = sobra;
+        
+        if (!ocluido && novoQuant < this->_MAX_TAM) {
+            novosIntervalos[novoQuant++] = atual;
         }
-
-        iA++;
     }
 
-    quantA = iWA;
+    // Atualizar intervalos do objeto atrás
+    for (int i = 0; i < novoQuant && i < this->_MAX_TAM; i++) {
+        intervalosTras[i] = novosIntervalos[i];
+    }
+    tras.setQuantIntervalos(novoQuant);
 }
-
-
 
 void Cena::_particao(int esq, int dir, int* i, int* j, Objeto* objetos, _CriterioOrdenacao criterio) {
     Objeto x;

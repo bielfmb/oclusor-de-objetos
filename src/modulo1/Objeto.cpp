@@ -35,17 +35,6 @@ void Objeto::_atualizarIntervalo(int pos, double x){
     this->_intervalos[pos].fim = x + (this->_largura/2.00);
 }
 
-void Objeto::_removerIntervalo(int pos, double x) {
-    if (pos >= this->_quantIntervalos) return;
-
-    this->_quantIntervalos--;
-
-    for (int i = pos; i < this->_quantIntervalos; i++) {
-        this->_intervalos[i].inicio = this->_intervalos[i + 1].inicio;
-        this->_intervalos[i].fim = this->_intervalos[i + 1].fim;
-    }
-}
-
 Objeto& Objeto::operator = (const Objeto& objeto) {
     this->_id = objeto._id;
     this->_x = objeto._x;

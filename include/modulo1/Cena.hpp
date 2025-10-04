@@ -28,8 +28,7 @@ class Cena {
         int _quantObjetos;
         Objeto _objetos[_MAX_TAM];
 
-        void _calcularOclusao(Intervalo* A, int& quantA,
-                              Intervalo* B, int quantB);
+        void _calcularOclusao(Objeto& frente, Objeto& tras);
 
         void _particao(int esq, int dir, 
                        int* i, int* j, 

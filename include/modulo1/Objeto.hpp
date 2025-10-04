@@ -11,9 +11,7 @@ class Objeto {
 
         void movimentar(double x, double y);
         void _adicionarIntervalo(double x);
-        void _adicionarIntervalo(Intervalo inter);
         void _atualizarIntervalo(int pos, double x);
-        void _removerIntervalo(int pos, double x);
 
         Objeto& operator = (const Objeto& objeto);
 
