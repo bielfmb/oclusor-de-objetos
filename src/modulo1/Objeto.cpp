@@ -22,6 +22,12 @@ void Objeto::movimentar(double x, double y) {
 }
 
 void Objeto::_adicionarIntervalo(double x) {
+    if (this->_quantIntervalos > this->_MAX_TAM)
+        throw std::out_of_range("O objeto " + std::to_string(this->_id) 
+                                + " atingiu o tamanho máximo de " 
+                                + std::to_string(this->_MAX_TAM)
+                                + " intervalos.");
+
     this->_intervalos[this->_quantIntervalos].inicio = x - (this->_largura/2.00);
     this->_intervalos[this->_quantIntervalos].fim = x + (this->_largura/2.00);
 

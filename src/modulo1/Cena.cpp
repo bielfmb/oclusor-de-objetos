@@ -1,11 +1,15 @@
 #include "modulo1/Cena.hpp"
 
 
-Cena::Cena(int tempo, Objeto* objetos, int nObjetos) 
+Cena::Cena(int tempo, Objeto* objetos, int quantObjetos) 
             :  _tempo(tempo),
-                _quantObjetos(0) {
+                _quantObjetos(0) 
+{
+    if (quantObjetos < 0 || quantObjetos > this->_MAX_TAM) 
+        throw std::out_of_range("A lista deve ter um tamanho entre 0 e " 
+                                + std::to_string(this->_MAX_TAM));
 
-    for (int i = 0; i < nObjetos; i++)
+    for (int i = 0; i < quantObjetos; i++)
         this->adicionarObjeto(objetos[i]);
 }
 
@@ -13,13 +17,21 @@ void Cena::adicionarObjeto(Objeto objeto) {
     if (_quantObjetos < this->_MAX_TAM) {
         this->_objetos[_quantObjetos] = objeto;
         _quantObjetos++;
+    } else {
+        throw std::out_of_range("A lista atingiu o tamanho máximo de " 
+                                + std::to_string(this->_MAX_TAM)
+                                + " objetos.");
     }
 }
 
 void Cena::gerarCena() {
-    this->_quickSort(0, this->_quantObjetos - 1, this->_objetos, this->POR_Y);
+    if (this->_quantObjetos <= 0) 
+        throw std::logic_error("Não é possível criar uma cena sem objetos.");
 
-    if (this->_quantObjetos <= 0) return;
+    if (this->_quantObjetos == 1)
+        return;
+
+    this->_quickSort(0, this->_quantObjetos - 1, this->_objetos, this->POR_Y);
 
     for (int i = 0; i < this->_quantObjetos; i++) {
         Objeto& objFrente = this->_objetos[i];
@@ -31,14 +43,12 @@ void Cena::gerarCena() {
     }
 }
 
-void Cena::movimentarObjeto(int id, int x, int y) {
-    if (id <= this->_quantObjetos)
-        this->_objetos[id].movimentar(x, y);
-}
-
 void Cena::imprimir() {
     Objeto o;
     Intervalo* inter;
+
+    if (this->_quantObjetos <= 0) 
+        throw std::logic_error("Não é possível imprimir uma cena sem objetos.");
 
     this->_quickSort(0, this->_quantObjetos - 1, this->_objetos, this->POR_ID);
 
@@ -57,9 +67,6 @@ void Cena::imprimir() {
     }
 }
 
-Objeto* Cena::getObjetos() { return this->_objetos; }
-
-
 void Cena::_calcularOclusao(Objeto& frente, Objeto& tras) {
     Intervalo* intervalosFrente = frente.getIntervalos();
     Intervalo* intervalosTras = tras.getIntervalos();
@@ -76,9 +83,8 @@ void Cena::_calcularOclusao(Objeto& frente, Objeto& tras) {
         for (int j = 0; j < quantFrente && !ocluido; j++) {
             Intervalo oclusor = intervalosFrente[j];
             
-            if (atual.fim <= oclusor.inicio || atual.inicio >= oclusor.fim) {
+            if (atual.fim <= oclusor.inicio || atual.inicio >= oclusor.fim)
                 continue;
-            }
             
             if (atual.inicio >= oclusor.inicio && atual.fim <= oclusor.fim) {
                 ocluido = true;
@@ -87,9 +93,9 @@ void Cena::_calcularOclusao(Objeto& frente, Objeto& tras) {
             
             if (atual.inicio < oclusor.inicio) {
                 Intervalo esquerda = {atual.inicio, oclusor.inicio};
-                if (novoQuant < this->_MAX_TAM) {
+
+                if (novoQuant < this->_MAX_TAM)
                     novosIntervalos[novoQuant++] = esquerda;
-                }
             }
             
             if (atual.fim > oclusor.fim) {
@@ -101,26 +107,27 @@ void Cena::_calcularOclusao(Objeto& frente, Objeto& tras) {
             }
         }
         
-        if (!ocluido && novoQuant < this->_MAX_TAM) {
+        if (!ocluido && novoQuant < this->_MAX_TAM)
             novosIntervalos[novoQuant++] = atual;
-        }
     }
 
     // Atualizar intervalos do objeto atrás
-    for (int i = 0; i < novoQuant && i < this->_MAX_TAM; i++) {
+    for (int i = 0; i < novoQuant && i < this->_MAX_TAM; i++)
         intervalosTras[i] = novosIntervalos[i];
-    }
+
     tras.setQuantIntervalos(novoQuant);
 }
 
-void Cena::_particao(int esq, int dir, int* i, int* j, Objeto* objetos, _CriterioOrdenacao criterio) {
+void Cena::_particao(int esq, int dir, int* i, int* j, 
+                     Objeto* objetos, _CriterioOrdenacao criterio) 
+{
     Objeto x;
 
     *i = esq; 
     *j = dir;
 
-    // NOTA: se há mais de 3 elementos na particao, escolhe o pivô como a mediana
-    // entre 3 objetos para evitar o pior caso do QuickSort
+    // NOTA: se há mais de 3 elementos na particao, escolhe o pivô como a 
+    // mediana entre 3 objetos para evitar o pior caso do QuickSort
     if (dir - esq >= 3) {
         int idPivo = this->_calcularPivo(*i,
                                         (*i + *j)/2,
@@ -149,7 +156,9 @@ void Cena::_particao(int esq, int dir, int* i, int* j, Objeto* objetos, _Criteri
     } while (*i <= *j);
 }
 
-void Cena::_quickSort(int esq, int dir, Objeto* objetos, _CriterioOrdenacao criterio) {
+void Cena::_quickSort(int esq, int dir, 
+                      Objeto* objetos, _CriterioOrdenacao criterio) 
+{
     int i, j;
     this->_particao(esq, dir, &i, &j, objetos, criterio);
 
@@ -163,7 +172,9 @@ void Cena::_trocar(int x, int y, Objeto* objetos) {
     objetos[y] = aux;
 }
 
-int Cena::_calcularPivo(int a, int b, int c, Objeto* objetos, _CriterioOrdenacao criterio) {
+int Cena::_calcularPivo(int a, int b, int c, 
+                        Objeto* objetos, _CriterioOrdenacao criterio) 
+{
     double x, y, z;
 
     if (criterio == this->POR_Y) {
