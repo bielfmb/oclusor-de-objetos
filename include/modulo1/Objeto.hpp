@@ -71,34 +71,14 @@ class Objeto {
         double getY();
 
         /**
-         * @brief Getter da quantidade de intervalos que o objeto possui.
+         * @brief Getter do segmento ocupado pelo objeto.
          * 
-         * @return O inteiro com o número de intervalos do objeto. 
+         * @return O intervalo que o objeto preenche.
          */
-        int getQuantIntervalos();
-
-        /**
-         * @brief Setter da quantidade de intervalos do objeto.
-         * 
-         * @param quant Nova quantidade de segmentos do objeto.
-         */
-        void setQuantIntervalos(int quant);
-
-        /**
-         * @brief Getter da lista de intervalos do objeto.
-         * 
-         * @return O ponteiro com os intervalos ocupados pelo objeto.
-         */
-        Intervalo* getIntervalos();
+        Intervalo getIntervalo();
         
 
     private:
-        static const int _MAX_TAM = 10; //!< Tamanho máximo da quantidade
-                                        // de intervalos de um objeto.
-
-        int _quantIntervalos; /*!< Quantidade de elementos na lista de 
-                              intervalos. */
-
         int _id; //!< Identificador do objeto.
 
         double _x, _y; //!< Centro do segmento no eixo x e posição dele
@@ -107,12 +87,10 @@ class Objeto {
         double _largura; //!< Tamanho total do segmento, de uma ponta
                          // à outra.
         
-        Intervalo _intervalos[_MAX_TAM]; //!< Lista com os possiveis
-                                         // intervalos do objeto. 
+        Intervalo _intervalo; //!< Segmento ocupado pelo objeto
 
         /**
-         * @brief Método auxiliar para inserir um elemento no vetor de 
-         * intervalos.
+         * @brief Método auxiliar para criar o intervalo do objeto.
          * 
          * @param x Centro do segmento, utilizado para calcular o início
          * e o fim dele no eixo x a partir da largura.
@@ -120,14 +98,12 @@ class Objeto {
         void _adicionarIntervalo(double x);
 
         /**
-         * @brief Método auxiliar para atualizar um elemento no vetor de 
-         * intervalos.
+         * @brief Método auxiliar para atualizar o intervalo do objeto
          * 
-         * @param pos Posição para acessar o intervalo que se quer atualizar.
          * @param x Centro do segmento, utilizado para calcular o início
          * e o fim dele no eixo x a partir da largura.
          */        
-        void _atualizarIntervalo(int pos, double x);
+        void _calcularIntervalo(double x);
         
 };
 
