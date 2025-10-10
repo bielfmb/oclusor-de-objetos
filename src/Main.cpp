@@ -1,5 +1,4 @@
 #include <iostream>
-#include <fstream>
 #include "modulo1/Objeto.hpp"
 #include "modulo1/Cena.hpp"
 
@@ -8,6 +7,8 @@ int main() {
     Cena cena;
 
     char tipo;
+
+    // NOTA: Loop é executado enquanto um caractere for inserido na entrada.
     while (std::cin >> tipo)
     {
         switch (tipo) {
@@ -16,8 +17,15 @@ int main() {
                 double x, y, largura;
 
                 if (std::cin >> id >> x >> y >> largura)
-                    cena.adicionarObjeto(Objeto(id, x, y, largura));
-
+                    try {
+                        cena.adicionarObjeto(Objeto(id, x, y, largura));
+                    }
+                    catch(std::out_of_range& e) {
+                        std::cerr << e.what() << std::endl;
+                    }
+                    catch(std::exception& e) {
+                        std::cerr << e.what() << std::endl;
+                    }
                 break;
             }
             case 'M':{

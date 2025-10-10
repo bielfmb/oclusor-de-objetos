@@ -73,7 +73,7 @@ class Objeto {
         /**
          * @brief Getter do segmento ocupado pelo objeto.
          * 
-         * @return O intervalo que o objeto preenche.
+         * @return Cópia do intervalo que o objeto preenche.
          */
         Intervalo getIntervalo();
         
@@ -88,14 +88,6 @@ class Objeto {
                          // à outra.
         
         Intervalo _intervalo; //!< Segmento ocupado pelo objeto
-
-        /**
-         * @brief Método auxiliar para criar o intervalo do objeto.
-         * 
-         * @param x Centro do segmento, utilizado para calcular o início
-         * e o fim dele no eixo x a partir da largura.
-         */
-        void _adicionarIntervalo(double x);
 
         /**
          * @brief Método auxiliar para atualizar o intervalo do objeto

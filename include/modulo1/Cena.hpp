@@ -12,7 +12,13 @@
  */
 class Cena {
     public:
-
+        /**
+         * @brief Construtor padrão de cena.
+         * 
+         * @details Utilizado apenas para setar os valores de tempo e das
+         * quantidades de elementos nos vetores de objetos e intervalos da
+         * cena no momento que uma cena é instanciada.
+         */
         Cena();
         
         /**
@@ -22,25 +28,30 @@ class Cena {
          * @param objeto O elemento a ser inserido na lista de objetos.
          * 
          * @details Este método também é utilizado pelo construtor de cena,
-         * a fim de garantir que o ponteiro passado com argumento pode ser
+         * a fim de garantir que o objeto passado com argumento pode ser
          * usado na lista de objetos guardados por esta classe.
          */
         void adicionarObjeto(Objeto objeto);
 
+        /**
+         * @brief Procura e move um objeto tanto no eixo x, quanto no y.
+         * 
+         * @param id Qual objeto deve ser movido
+         * @param x Novo centro do objeto no eixo horizontal.
+         * @param y Nova posição do objeto no eixo vertical.
+         */
         void movimentarObjeto(int id, double x, double y);
 
         /**
          * @brief Reorganiza o vetor de objetos para conter apenas os 
-         * elementos que vão aparecer na cena final
-         * 
-         * 
+         * elementos que vão aparecer na cena final.
          */
         void gerar();
 
         /**
-         * @brief Formata a cena final para a impressão no terminal.
+         * @brief Formata a cena final para impressão no terminal.
          * 
-         * @details Mostra no terminal os atributos do elementos que 
+         * @details Mostra no terminal os atributos dos elementos que 
          * estão no vetor de intervalos, seguindo o formato:
          * S <tempo> <inicio> <fim>.
          */
@@ -54,24 +65,28 @@ class Cena {
 
         int _tempo; //!< Instante em que a cena será gerada.
 
-        int _quantObjetos; //!< Número de objetos válidos na cena.
+        int _quantObjetos; //!< Número de objetos válidos a processar.
 
         int _naCena; //!< Número de intervalos válidos na cena.
 
         Objeto _objetos[_MAX_TAM]; //!< Lista de objetos a serem processados
 
-        Intervalo _cena[_MAX_TAM * 10]; //!< Lista da cena a ser renderizada
+        Intervalo _cena[_MAX_TAM * 10]; //!< Lista de intervalos a renderizar
 
 
         /**
          * @brief Utilizada como parâmetro no QuickSort para ordenar um array
          * de intervalos pelo id. 
          * 
+         * @details Retorna uma chave composta para o QuickSort, garantindo  
+         * que a ordenação por inicio funcione como critério secundário de 
+         * desempate para intervalos com mesmo id de objeto.
+         * 
          * @param inter Intervalo a se retornar o id.
          * 
          * @return O identificador do objeto que aquele intervalo pertence.
          */
-        static double _retornarKeyId(Intervalo* inter);
+        static double _getKeyId(Intervalo* inter);
 
         /**
          * @brief Utilizada como parâmetro no QuickSort para ordenar um array
@@ -81,25 +96,34 @@ class Cena {
          * 
          * @return A posição do objeto no eixo vertical.
          */        
-        static double _retornarKeyY(Objeto* objeto);
+        static double _getKeyY(Objeto* objeto);
 
         /**
          * @brief Percorre a lista de intervalos na cena e verifica se 
          * algum oclui o objeto passado como parâmetro.
          * 
-         * @details Se um elemento na cena divide o objeto em 2 partes, esses
-         * pedaços são comparados aos próximos elementos recursivamente.
+         * @details Se um elemento na cena divide o objeto em 2 partes, o
+         * pedaço à esquerda é adicionado à cena e o que está à direita
+         * é comparado aos próximos elementos recursivamente.
          * 
          * @param ocluido Intervalo a se verificar se há interseção com os 
          * elementos já na cena.
-         * @param verificados Quantidade de intervalos que já foram realizadas
-         * as verificações, usado pricipalmente na recursão.
+         * @param verificados Índice do primeiro intervalo a ser usado na 
+         * verificação, usado para otimizar a recursão.
          */
         void _calcularOclusao(Intervalo* ocluido, int verificados);
 
         /**
+         * @brief Insere um intervalo de forma ordenada na cena, do menor 
+         * início para o maior.
+         * 
+         * @param inter O intervalo a ser inserido.
+         */
+        void _inserirNaCena(Intervalo* inter);
+
+        /**
          * @brief Ordena a lista de objetos passada como parâmetro de
-         * acordo com uma chave específico.
+         * acordo com uma chave específica.
          * 
          * @param esq Posição do elemento inicial da sub-lista.
          * @param dir Posição do elemento final da sub-lista.
@@ -107,7 +131,6 @@ class Cena {
          * @param get Função que retorna por qual parâmetro a lista deve 
          * ser ordenada.
          */
-
         template <typename T, typename GetKey>
         void _quickSort(int esq, int dir, 
                       T* lista, GetKey get) 
@@ -119,7 +142,17 @@ class Cena {
             if (i < dir) this->_quickSort(i, dir, lista, get);
         }
 
-
+        /**
+         * @brief Particiona a sub-lista de forma genérica, preparando-a para
+         * o próximo passo recursivo do QuickSort.
+         * 
+         * @param esq Posição do elemento inicial da sub-lista.
+         * @param dir Posição do elemento final da sub-lista.
+         * @param i Ponteiro para o índice da esquerda (que será retornado).
+         * @param j Ponteiro para o índice da direita (que será retornado).
+         * @param lista Lista a ser particionada.
+         * @param get Função que retorna a chave de ordenação do elemento.
+         */
         template <typename T, typename GetKey>
         void _particao(int esq, int dir, int* i, int* j, 
                      T* lista, GetKey get) 
@@ -154,16 +187,26 @@ class Cena {
             } while (*i <= *j);
         }
 
+        /**
+         * @brief Calcula o índice do pivô utilizando uma mediana de três
+         * para evitar o pior caso de O(n^2) do QuickSort.
+         * 
+         * @param a Índice do primeiro elemento.
+         * @param b Índice do elemento central.
+         * @param c Índice do último elemento.
+         * @param lista Lista contendo os elementos.
+         * @param get Função que retorna a chave de ordenação.
+         * 
+         * @return O índice do elemento que representa a mediana.
+         */
         template <typename T, typename GetKey>
-        int _calcularPivo(int a, int b, int c, 
-                                T* lista, GetKey get) 
-        {
+        int _calcularPivo(int a, int b, int c, T* lista, GetKey get) {
             double x = get(&lista[a]);
             double y = get(&lista[b]);
             double z = get(&lista[c]);
 
-            if ((y >= x && x <= z) || (z <= x && x >= y)) return a;
-            if ((x >= y && y <= z) || (z >= y && y <= x)) return b;
+            if ((x <= y && y <= z) || (z <= y && y <= x)) return b;
+            if ((y <= x && x <= z) || (z <= x && x <= y)) return a;
             return c;
         }
 
