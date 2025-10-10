@@ -1,18 +1,7 @@
 #include "modulo1/Cena.hpp"
 
 
-Cena::Cena(int tempo, Objeto* objetos, int quantObjetos) 
-            :  _tempo(tempo),
-                _quantObjetos(0),
-                _naCena(0)
-{
-    if (quantObjetos < 0 || quantObjetos > this->_MAX_TAM) 
-        throw std::out_of_range("A lista deve ter um tamanho entre 0 e " 
-                                + std::to_string(this->_MAX_TAM));
-
-    for (int i = 0; i < quantObjetos; i++)
-        this->adicionarObjeto(objetos[i]);
-}
+Cena::Cena() : _tempo(0), _quantObjetos(0), _naCena(0) {}
 
 void Cena::adicionarObjeto(Objeto objeto) {
     if (_quantObjetos < this->_MAX_TAM) {
@@ -25,16 +14,22 @@ void Cena::adicionarObjeto(Objeto objeto) {
     }
 }
 
-void Cena::gerarCena() {
+void Cena::movimentarObjeto(int id, double x, double y) {
+    for (Objeto& o : this->_objetos)
+        if (o.getId() == id) {
+            o.movimentar(x, y);
+            return;
+        }
+}
+
+void Cena::gerar() {
     Intervalo objeto;
 
     if (this->_quantObjetos <= 0) 
         throw std::logic_error("Não é possível criar uma cena sem objetos.");
 
-    if (this->_naCena <= 0){
-        this->_cena[0] = this->_objetos[0].getIntervalo();
-        this->_naCena = 1;
-    }
+    this->_cena[0] = this->_objetos[0].getIntervalo();
+    this->_naCena = 1;
 
     this->_quickSort(0, this->_quantObjetos - 1, this->_objetos, this->_retornarKeyY);
 
@@ -61,6 +56,24 @@ void Cena::imprimir() {
     }
 }
 
+void Cena::setTempo(int tempo) {
+    if (tempo < 0)
+        throw std::logic_error("Não é possível gerar uma cena em um "
+                                "instante de tempo negativo.");
+    
+    this->_tempo = tempo; 
+}
+
+
+double Cena::_retornarKeyId(Intervalo* inter) {
+    const double FATOR = 100000.0;
+    
+    return (double)inter->id + (inter->inicio / FATOR);
+}
+
+double Cena::_retornarKeyY(Objeto* objeto) {
+    return objeto->getY();
+}
 
 void Cena::_calcularOclusao(Intervalo* ocluido, int verificados) {
     Intervalo* o = ocluido;
@@ -100,14 +113,4 @@ void Cena::_calcularOclusao(Intervalo* ocluido, int verificados) {
 
     this->_cena[i + 1] = *o;
     this->_naCena++;
-}
-
-double Cena::_retornarKeyId(Intervalo* inter) {
-    const double FATOR = 100000.0;
-    
-    return (double)inter->id + (inter->inicio / FATOR);
-}
-
-double Cena::_retornarKeyY(Objeto* objeto) {
-    return objeto->getY();
 }

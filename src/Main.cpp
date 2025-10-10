@@ -5,9 +5,7 @@
 
 
 int main() {
-
-    Objeto objetos[100] = {};
-    int quantObjetos = 0;
+    Cena cena;
 
     char tipo;
     while (std::cin >> tipo)
@@ -17,10 +15,8 @@ int main() {
                 int id;
                 double x, y, largura;
 
-                if (std::cin >> id >> x >> y >> largura) {
-                    objetos[quantObjetos] = Objeto(id, x, y, largura);
-                    quantObjetos++;
-                }
+                if (std::cin >> id >> x >> y >> largura)
+                    cena.adicionarObjeto(Objeto(id, x, y, largura));
 
                 break;
             }
@@ -29,9 +25,7 @@ int main() {
                 double x, y;
 
                 if (std::cin >> tempo >> id >> x >> y)
-                    for (int i = 0; i < quantObjetos; i++)
-                        if (objetos[i].getId() == id) 
-                            objetos[i].movimentar(x, y);
+                    cena.movimentarObjeto(id, x, y);
 
                 break;
             }
@@ -40,8 +34,8 @@ int main() {
 
                 if (std::cin >> tempo) {
                     try {
-                        Cena cena(tempo, objetos, quantObjetos);
-                        cena.gerarCena();
+                        cena.setTempo(tempo);
+                        cena.gerar();
                         cena.imprimir();
                     }
                     catch(std::out_of_range& e) {

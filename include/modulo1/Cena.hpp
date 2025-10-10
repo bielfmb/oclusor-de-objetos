@@ -12,15 +12,8 @@
  */
 class Cena {
     public:
-        /**
-         * @brief Construtor da cena.
-         * 
-         * @param tempo Instante da renderização da cena
-         * @param objetos Lista dos objetos a serem processados para 
-         * aparecer na cena.
-         * @param quantObjetos Número dos objetos na lista passada. 
-         */
-        Cena(int tempo, Objeto* objetos, int quantObjetos);
+
+        Cena();
         
         /**
          * @brief Insere um objeto para ser processado antes de entrar
@@ -34,13 +27,15 @@ class Cena {
          */
         void adicionarObjeto(Objeto objeto);
 
+        void movimentarObjeto(int id, double x, double y);
+
         /**
          * @brief Reorganiza o vetor de objetos para conter apenas os 
          * elementos que vão aparecer na cena final
          * 
          * 
          */
-        void gerarCena();
+        void gerar();
 
         /**
          * @brief Formata a cena final para a impressão no terminal.
@@ -51,6 +46,7 @@ class Cena {
          */
         void imprimir();
 
+        void setTempo(int tempo);
 
     private:
         static const int _MAX_TAM = 100; //!< Define o tamanho máximo do
@@ -60,25 +56,12 @@ class Cena {
 
         int _quantObjetos; //!< Número de objetos válidos na cena.
 
+        int _naCena; //!< Número de intervalos válidos na cena.
+
         Objeto _objetos[_MAX_TAM]; //!< Lista de objetos a serem processados
 
         Intervalo _cena[_MAX_TAM * 10]; //!< Lista da cena a ser renderizada
 
-        int _naCena; //!< Número de intervalos válidos na cena.
-
-        /**
-         * @brief Percorre a lista de intervalos na cena e verifica se 
-         * algum oclui o objeto passado como parâmetro.
-         * 
-         * @details Se um elemento na cena divide o objeto em 2 partes, esses
-         * pedaços são comparados aos próximos elementos recursivamente.
-         * 
-         * @param ocluido Intervalo a se verificar se há interseção com os 
-         * elementos já na cena.
-         * @param verificados Quantidade de intervalos que já foram realizadas
-         * as verificações, usado pricipalmente na recursão.
-         */
-        void _calcularOclusao(Intervalo* ocluido, int verificados);
 
         /**
          * @brief Utilizada como parâmetro no QuickSort para ordenar um array
@@ -99,6 +82,20 @@ class Cena {
          * @return A posição do objeto no eixo vertical.
          */        
         static double _retornarKeyY(Objeto* objeto);
+
+        /**
+         * @brief Percorre a lista de intervalos na cena e verifica se 
+         * algum oclui o objeto passado como parâmetro.
+         * 
+         * @details Se um elemento na cena divide o objeto em 2 partes, esses
+         * pedaços são comparados aos próximos elementos recursivamente.
+         * 
+         * @param ocluido Intervalo a se verificar se há interseção com os 
+         * elementos já na cena.
+         * @param verificados Quantidade de intervalos que já foram realizadas
+         * as verificações, usado pricipalmente na recursão.
+         */
+        void _calcularOclusao(Intervalo* ocluido, int verificados);
 
         /**
          * @brief Ordena a lista de objetos passada como parâmetro de
