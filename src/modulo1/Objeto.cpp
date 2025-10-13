@@ -3,11 +3,11 @@
 
 Objeto::Objeto(int id, double x, double y, double largura) 
     : _id(id),
-      _x(x),
-      _y(y),
-      _largura(largura) {
+    _x(x),
+    _y(y),
+    _largura(largura) {
 
-    this->_calcularIntervalo();
+    this->_calcularIntervalo(x);
 }
 
 Objeto::Objeto() { this->_id = -1; }
@@ -16,11 +16,7 @@ void Objeto::movimentar(double x, double y) {
     this->_x = x;
     this->_y = y;
 
-    this->_calcularIntervalo();
-}
-
-bool Objeto::estaNoIntervalo(Objeto objeto) {
-    return (this->_inicio < objeto._fim && objeto._inicio < this->_fim);
+    this->_calcularIntervalo(x);
 }
 
 Objeto& Objeto::operator = (const Objeto& objeto) {
@@ -28,9 +24,7 @@ Objeto& Objeto::operator = (const Objeto& objeto) {
     this->_x = objeto._x;
     this->_y = objeto._y;
     this->_largura = objeto._largura;
-    this->_inicio = objeto._x - (objeto._largura/2.00);
-    this->_fim = objeto._x + (objeto._largura/2.00);      
-    //this->_calcularIntervalo();
+    this->_intervalo = objeto._intervalo;
 
     return *this;
 }
@@ -41,15 +35,15 @@ double Objeto::getX() { return this->_x; }
 
 double Objeto::getY() { return this->_y; }
 
-double Objeto::getInicio() { return this->_inicio; }
+Intervalo Objeto::getIntervalo() { return this->_intervalo; }
 
-void Objeto::setInicio(double inicio) { this->_inicio = inicio; }
 
-double Objeto::getFim() { return this->_fim; }
+void Objeto::_calcularIntervalo(double x) {
+    this->_intervalo.id = this->_id;
 
-void Objeto::setFim(double fim) { this->_fim = fim; }
-
-void Objeto::_calcularIntervalo() {
-    this->_inicio = this->_x - (this->_largura/2.00);
-    this->_fim = this->_x + (this->_largura/2.00);  
+    // EXEMPLO: x = 5, largura = 4.
+    // inicio = 5 - 2 = 3, fim = 5 + 2 = 7
+    // Logo, o intervalo é (3, 7), com 4 de tamanho e centro em 5.
+    this->_intervalo.inicio = x - (this->_largura/2.00);
+    this->_intervalo.fim = x + (this->_largura/2.00);
 }
