@@ -1,30 +1,54 @@
 # cc and flags
 CC = g++
 CXXFLAGS = -std=c++11 -g -Wall
-#CXXFLAGS = -std=c++11 -O3 -Wall
 
-# folders
-INCLUDE_FOLDER = ./include/
-BIN_FOLDER = ./bin/
-OBJ_FOLDER = ./obj/
-SRC_FOLDER = ./src/
-DIRS = $(OBJ_FOLDER) $(OBJ_FOLDER)modulo1 
+INCLUDE_FOLDER = include
+BIN_FOLDER = bin
+OBJ_FOLDER = obj
+SRC_FOLDER = src
+TESTS_FOLDER = tests
 
-# all sources, objs, and header files
-MAIN = Main
-TARGET = tp1.out
-SRC = $(wildcard $(SRC_FOLDER)*.cpp) \
-	  $(wildcard $(SRC_FOLDER)modulo1/*.cpp)
-OBJ = $(patsubst $(SRC_FOLDER)%.cpp, $(OBJ_FOLDER)%.o, $(SRC))
+MAIN_TARGET = $(BIN_FOLDER)/oclusor.out
+TEST_TARGET = $(BIN_FOLDER)/tests.out
 
-$(OBJ_FOLDER)%.o: $(SRC_FOLDER)%.cpp $(DIRS)
+# sources and objects
+SRC = $(wildcard $(SRC_FOLDER)/*.cpp) \
+      $(wildcard $(SRC_FOLDER)/cena/*.cpp) \
+      $(wildcard $(SRC_FOLDER)/auxi/*.cpp)
+
+SRC_OBJ = $(patsubst $(SRC_FOLDER)/%.cpp,$(OBJ_FOLDER)/%.o,$(SRC))
+
+# tests and tests objects
+TESTS = $(wildcard $(TESTS_FOLDER)/*.cpp)
+
+TESTS_OBJ = $(patsubst $(TESTS_FOLDER)/%.cpp,$(OBJ_FOLDER)/%.o,$(TESTS))
+
+# targets
+.PHONY: all tests clean
+
+# default
+all: $(MAIN_TARGET)
+
+# tests
+tests: $(TEST_TARGET)
+	./$(TEST_TARGET)
+
+# build
+$(MAIN_TARGET): $(SRC_OBJ)
+	@mkdir -p $(BIN_FOLDER)
+	$(CC) $(CXXFLAGS) -o $@ $(SRC_OBJ)
+
+$(TEST_TARGET): $(TESTS_OBJ) $(filter-out $(OBJ_FOLDER)/Main.o, $(SRC_OBJ))
+	@mkdir -p $(BIN_FOLDER)
+	$(CC) $(CXXFLAGS) -o $@ $^
+
+$(OBJ_FOLDER)/%.o: $(SRC_FOLDER)/%.cpp 
+	@mkdir -p $(dir $@)
 	$(CC) $(CXXFLAGS) -c $< -o $@ -I$(INCLUDE_FOLDER)
 
-$(DIRS):
-	@mkdir -p $(OBJ_FOLDER)modulo1
-
-all: $(DIRS) $(OBJ) 
-	$(CC) $(CXXFLAGS) -o $(BIN_FOLDER)$(TARGET) $(OBJ)
+$(OBJ_FOLDER)/%.o: $(TESTS_FOLDER)/%.cpp 
+	@mkdir -p $(dir $@)
+	$(CC) $(CXXFLAGS) -c $< -o $@ -I$(INCLUDE_FOLDER) -I.
 
 clean:
-	@rm -rf $(OBJ_FOLDER)* $(BIN_FOLDER)*
+	@rm -rf $(OBJ_FOLDER) $(BIN_FOLDER)
