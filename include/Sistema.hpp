@@ -6,6 +6,11 @@
 #include "cena/Cena.hpp"
 
 
+/**
+ * @class Sistema
+ * 
+ * @brief Motor principal do programa
+ */
 class Sistema {
     public:
         /**
